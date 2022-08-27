@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,8 +11,17 @@ public class Echo : MonoBehaviour
     private const int Port = 8888;
     
     private Socket _socket;
+    
+    public Button btnConnect;
+    public Button btnSend;
     public InputField inputField;
     public Text text;
+
+    private void Start()
+    {
+        btnConnect.onClick.AddListener(Connection);
+        btnSend.onClick.AddListener(Send);
+    }
 
     public void Connection()
     {
@@ -36,5 +46,11 @@ public class Echo : MonoBehaviour
 
         text.text = recvStr;
         _socket.Close();
+    }
+
+    private void OnDestroy()
+    {
+        btnConnect.onClick.RemoveAllListeners();
+        btnSend.onClick.RemoveAllListeners();
     }
 }
