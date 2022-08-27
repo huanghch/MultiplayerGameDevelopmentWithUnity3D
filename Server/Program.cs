@@ -103,7 +103,13 @@ namespace EchoServer
 
                 string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 0, count);
                 byte[] sendBytes = System.Text.Encoding.Default.GetBytes(string.Format("echo {0}", recvStr));
-                clientfd.Send(sendBytes);
+                
+                // clientfd.Send(sendBytes);
+                foreach (ClientState s in _clients.Values)
+                {
+                    s.socket.Send(sendBytes);
+                }
+                
                 clientfd.BeginReceive(state.readBuff, 0, 1024, 0, ReceiveCallback, state);
             }
             catch (SocketException ex)

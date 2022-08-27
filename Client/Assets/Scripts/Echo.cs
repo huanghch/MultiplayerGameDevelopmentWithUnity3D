@@ -97,7 +97,8 @@ public class Echo : MonoBehaviour
         {
             Socket socket = (Socket) ar.AsyncState;
             int count = socket.EndReceive(ar);
-            _recvStr = System.Text.Encoding.Default.GetString(_readBuff, 0, count);
+            string s = System.Text.Encoding.Default.GetString(_readBuff, 0, count);
+            _recvStr = string.Format("{0}\n{1}", s, _recvStr);
 
             socket.BeginReceive(_readBuff, 0, 1024, 0, ReceiveCallback, socket);
         }
