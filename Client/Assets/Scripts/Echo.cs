@@ -11,6 +11,9 @@ public class Echo : MonoBehaviour
     private const int Port = 8888;
     
     private Socket _socket;
+    // 接收缓冲区
+    private byte[] _readBuff = new byte[1024];
+    private string _recvStr = "";
     
     public Button btnConnect;
     public Button btnSend;
@@ -23,13 +26,39 @@ public class Echo : MonoBehaviour
         btnSend.onClick.AddListener(Send);
     }
 
+    private void Update()
+    {
+        text.text = _recvStr;
+    }
+
+    private void OnDestroy()
+    {
+        btnConnect.onClick.RemoveAllListeners();
+        btnSend.onClick.RemoveAllListeners();
+    }
+
     public void Connection()
     {
         // Socket
         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         
         // Connect
-        _socket.Connect(IP, Port);
+        _socket.BeginConnect(IP, Port,ConnectCallback,_socket);
+    }
+
+    public void ConnectCallback(IAsyncResult ar)
+    {
+        try
+        {
+            Socket socket = (Socket) ar.AsyncState;
+            socket.EndConnect(ar);
+            Debug.Log("Socket Connect Succ");
+            socket.BeginReceive(_readBuff, 0, 1024, 0, ReceiveCallback, socket);
+        }
+        catch (SocketException ex)
+        {
+            Debug.Log("Socket Connect fail " + ex.ToString());
+        }
     }
 
     public void Send()
@@ -37,20 +66,44 @@ public class Echo : MonoBehaviour
         // Send
         string sendStr = inputField.text;
         byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
-        _socket.Send(sendBytes);
+        _socket.BeginSend(sendBytes, 0, sendBytes.Length, 0, SendCallback, _socket);
         
-        //Recv
-        byte[] readBuff = new byte[1024];
-        int count = _socket.Receive(readBuff);
-        string recvStr = System.Text.Encoding.Default.GetString(readBuff, 0, count);
-
-        text.text = recvStr;
-        _socket.Close();
+        // Recv
+        // byte[] readBuff = new byte[1024];
+        // int count = _socket.Receive(readBuff);
+        // string recvStr = System.Text.Encoding.Default.GetString(readBuff, 0, count);
+        //
+        // text.text = recvStr;
+        // _socket.Close();
     }
 
-    private void OnDestroy()
+    public void SendCallback(IAsyncResult ar)
     {
-        btnConnect.onClick.RemoveAllListeners();
-        btnSend.onClick.RemoveAllListeners();
+        try
+        {
+            Socket socket = (Socket) ar.AsyncState;
+            int count = socket.EndSend(ar);
+            Debug.Log("Socket Send succ" + count);
+        }
+        catch (SocketException ex)
+        {
+            Debug.Log("Socket Send fail" + ex.ToString());
+        }
+    }
+
+    public void ReceiveCallback(IAsyncResult ar)
+    {
+        try
+        {
+            Socket socket = (Socket) ar.AsyncState;
+            int count = socket.EndReceive(ar);
+            _recvStr = System.Text.Encoding.Default.GetString(_readBuff, 0, count);
+
+            socket.BeginReceive(_readBuff, 0, 1024, 0, ReceiveCallback, socket);
+        }
+        catch (SocketException ex)
+        {
+            Debug.Log("Socket Receive fail" + ex.ToString());
+        }
     }
 }
