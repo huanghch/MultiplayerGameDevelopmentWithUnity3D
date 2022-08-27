@@ -20,6 +20,98 @@ namespace EchoServer
 
         public static void Main(string[] args)
         {
+            // Socket
+            _listenfd = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            
+            // Bind
+            IPAddress ipAdr = IPAddress.Parse("127.0.0.1");
+            IPEndPoint ipEp = new IPEndPoint(ipAdr, 8888);
+            _listenfd.Bind(ipEp);
+            
+            // Listen
+            _listenfd.Listen(0);
+            Console.WriteLine("[服务器]启动成功");
+            
+            // 主循环
+            while (true)
+            {
+                // 检查listenfd
+                if (_listenfd.Poll(0, SelectMode.SelectRead))
+                {
+                    ReadListenfd(_listenfd);
+                }
+                
+                // 检查clientfd
+                foreach (ClientState s in _clients.Values)
+                {
+                    Socket clientfd = s.socket;
+                    if (clientfd.Poll(0, SelectMode.SelectRead))
+                    {
+                        if (!ReadClientfd(clientfd))
+                        {
+                            // 此处break，是因为在ReadClientfd存在_clients.Remove(clientfd)
+                            break;
+                        }
+                    }
+                }
+                
+                // 防止CPU占用过高
+                System.Threading.Thread.Sleep(1);
+            }
+        }
+
+        public static void ReadListenfd(Socket listenfd)
+        {
+            Console.WriteLine("Accept");
+            Socket clientfd = listenfd.Accept();
+            ClientState state = new ClientState();
+            state.socket = clientfd;
+            _clients.Add(clientfd, state);
+        }
+
+        public static bool ReadClientfd(Socket clientfd)
+        {
+            ClientState state = _clients[clientfd];
+            //接收
+            int count = 0;
+            try
+            {
+                count = clientfd.Receive(state.readBuff);
+            }
+            catch (SocketException ex) 
+            {
+                clientfd.Close();
+                _clients.Remove(clientfd);
+                Console.WriteLine("Receive SocketException " + ex.ToString());
+                return false;
+            }
+
+            //客户端关闭
+            if(count == 0)
+            {
+                clientfd.Close();
+                _clients.Remove(clientfd);
+                Console.WriteLine("Socket Close");
+                return false;
+            }
+            
+            //广播
+            string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 0, count);
+            Console.WriteLine("Receive" + recvStr);
+            string sendStr = clientfd.RemoteEndPoint.ToString() + ":" + recvStr;
+            byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
+            
+            foreach (ClientState cs in _clients.Values) 
+            {
+                cs.socket.Send(sendBytes);
+            }
+            
+            return true;
+        }
+        
+        // Socket
+        /*public static void Main(string[] args)
+        {
             Console.WriteLine("Hello, World!");
 
             // Socket
@@ -59,7 +151,6 @@ namespace EchoServer
             // 等待
             Console.ReadLine();
         }
-
         public static void AcceptCallback(IAsyncResult ar)
         {
             try
@@ -83,7 +174,6 @@ namespace EchoServer
                 Console.WriteLine("Socket Accept fail {0}", ex.ToString());
             }
         }
-
         public static void ReceiveCallback(IAsyncResult ar)
         {
             try
@@ -116,7 +206,7 @@ namespace EchoServer
             {
                 Console.WriteLine("Socket Receive fail {0}", ex.ToString() );
             }
-        }
+        }*/
     }
 }
 
