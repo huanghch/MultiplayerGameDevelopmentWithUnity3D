@@ -5,8 +5,8 @@ using System.Net.Sockets;
 
 public static class NetManager
 {
-    private const string IP = "127.0.0.1";
-    private const int Port = 8888;
+    // private const string IP = "127.0.0.1";
+    // private const int Port = 8888;
     
     // 定义套接字
     private static Socket _socket;
@@ -52,13 +52,13 @@ public static class NetManager
         return _socket.LocalEndPoint.ToString();
     }
 
-    public static void Connection()
+    public static void Connect(string ip, int port)
     {
         // Socket
         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         
         // Connect
-        _socket.BeginConnect(IP, Port, ConnectCallback, _socket);
+        _socket.BeginConnect(ip, port, ConnectCallback, _socket);
     }
 
     public static void ConnectCallback(IAsyncResult ar)
@@ -67,7 +67,7 @@ public static class NetManager
         {
             Socket socket = (Socket) ar.AsyncState;
             socket.EndConnect(ar);
-            Debug.Log("Socket Connect Succ");
+            //Debug.Log("Socket Connect Succ");
             socket.BeginReceive(_readBuff, 0, 1024, 0, ReceiveCallback, socket);
         }
         catch (SocketException ex)
@@ -109,7 +109,7 @@ public static class NetManager
         {
             Socket socket = (Socket) ar.AsyncState;
             int count = socket.EndSend(ar);
-            Debug.Log("Socket Send succ" + count);
+            //Debug.Log("Socket Send succ" + count);
         }
         catch (SocketException ex)
         {

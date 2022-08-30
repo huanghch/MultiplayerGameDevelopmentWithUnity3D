@@ -100,8 +100,8 @@ namespace EchoServer
             
             //广播
             string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 0, count);
-            Console.WriteLine("Receive" + recvStr);
-            string sendStr = clientfd.RemoteEndPoint.ToString() + ":" + recvStr;
+            Console.WriteLine("Receive: " + recvStr);
+            string sendStr = recvStr;
             byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
             
             foreach (ClientState cs in _clients.Values) 
