@@ -20,6 +20,7 @@ public class Main : MonoBehaviour
     {
         // 网络模块
         NetManager.AddListener("Enter", OnEnter);
+        NetManager.AddListener("List", OnList);
         NetManager.AddListener("Move", OnMove);
         NetManager.AddListener("Leave", OnLeave);
         NetManager.Connect(IP, Port);
@@ -32,7 +33,7 @@ public class Main : MonoBehaviour
         myHuman = obj.AddComponent<CtrlHuman>();
         myHuman.desc = NetManager.GetDesc();
         
-        // 发送协议
+        // 发送Enter协议
         Vector3 pos = myHuman.transform.position;
         Vector3 eul = myHuman.transform.eulerAngles;
         StringBuilder str = new StringBuilder("Enter|");
@@ -46,6 +47,9 @@ public class Main : MonoBehaviour
         str.Append(",");
         str.Append(eul.y);
         NetManager.Send(str.ToString());
+        
+        // 请求玩家列表
+        NetManager.Send("List|");
 
     }
 
@@ -77,6 +81,31 @@ public class Main : MonoBehaviour
         BaseHuman h = obj.AddComponent<SyncHuman>();
         h.desc = desc;
         otherHumans.Add(desc, h);
+    }
+
+    void OnList(string msgArgs)
+    {
+        Debug.Log("OnList|" + msgArgs);
+        string[] split = msgArgs.Split(',');
+        int count = (split.Length - 1) / 6;
+        for (int i = 0; i < count; i++)
+        {
+            string desc = split[i * 6];
+            float x = float.Parse(split[i * 6 + 1]);
+            float y = float.Parse(split[i * 6 + 2]);
+            float z = float.Parse(split[i * 6 + 3]);
+            float eulY = float.Parse(split[i * 6 + 4]);
+            int hp = int.Parse(split[i * 6 + 5]);
+            // 是自己
+            if (desc == NetManager.GetDesc()) return;
+            // 添加一个角色
+            GameObject obj = (GameObject) Instantiate(humanPrefab);
+            obj.transform.position = new Vector3(x, y, z);
+            obj.transform.eulerAngles = new Vector3(0, eulY, z);
+            BaseHuman h = obj.AddComponent<SyncHuman>();
+            h.desc = desc;
+            otherHumans.Add(desc, h);
+        }
     }
 
     void OnMove(string msgArgs)

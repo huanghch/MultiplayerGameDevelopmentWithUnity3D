@@ -11,6 +11,12 @@ namespace EchoServer
     {
         public Socket socket;
         public byte[] readBuff = new byte[1024];
+
+        public int hp = -100;
+        public float x = 0;
+        public float y = 0;
+        public float z = 0;
+        public float eulY = 0;
     }
     
     class MainClass
@@ -18,7 +24,7 @@ namespace EchoServer
         // 监听Socket
         private static Socket _listenfd;
         // 客户端Socket及状态信息
-        private static Dictionary<Socket, ClientState> _clients = new Dictionary<Socket, ClientState>();
+        public static Dictionary<Socket, ClientState> clients = new Dictionary<Socket, ClientState>();
 
         public static void Main(string[] args)
         {
@@ -42,7 +48,7 @@ namespace EchoServer
                 // 填充checkRead列表
                 checkRead.Clear();
                 checkRead.Add(_listenfd);
-                foreach (ClientState s in _clients.Values)
+                foreach (ClientState s in clients.Values)
                 {
                     checkRead.Add(s.socket);
                 }
@@ -71,12 +77,12 @@ namespace EchoServer
             Socket clientfd = listenfd.Accept();
             ClientState state = new ClientState();
             state.socket = clientfd;
-            _clients.Add(clientfd, state);
+            clients.Add(clientfd, state);
         }
 
         public static bool ReadClientfd(Socket clientfd)
         {
-            ClientState state = _clients[clientfd];
+            ClientState state = clients[clientfd];
             //接收
             int count = 0;
             try
@@ -90,7 +96,7 @@ namespace EchoServer
                 mei.Invoke(null, ob);
 
                 clientfd.Close();
-                _clients.Remove(clientfd);
+                clients.Remove(clientfd);
                 Console.WriteLine("Receive SocketException " + ex.ToString());
                 return false;
             }
@@ -103,7 +109,7 @@ namespace EchoServer
                 mei.Invoke(null, ob);
                 
                 clientfd.Close();
-                _clients.Remove(clientfd);
+                clients.Remove(clientfd);
                 Console.WriteLine("Socket Close");
                 return false;
             }
@@ -124,12 +130,18 @@ namespace EchoServer
             string sendStr = recvStr;
             byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
             
-            foreach (ClientState cs in _clients.Values) 
+            foreach (ClientState cs in clients.Values) 
             {
                 cs.socket.Send(sendBytes);
             }
             
             return true;
+        }
+
+        public static void Send(ClientState cs, string sendStr)
+        {
+            byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
+            cs.socket.Send(sendBytes);
         }
         
         // Poll状态检测
