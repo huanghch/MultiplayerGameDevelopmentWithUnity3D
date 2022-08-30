@@ -38,7 +38,6 @@ public class Poll : MonoBehaviour
     public void Connection()
     {
         // Socket
-        // Socket
         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         
         // Connect

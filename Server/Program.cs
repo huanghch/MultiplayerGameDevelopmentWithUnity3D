@@ -32,33 +32,36 @@ namespace EchoServer
             _listenfd.Listen(0);
             Console.WriteLine("[服务器]启动成功");
             
-            // 主循环
+            // checkRead
+            List<Socket> checkRead = new List<Socket>();
+
             while (true)
             {
-                // 检查listenfd
-                if (_listenfd.Poll(0, SelectMode.SelectRead))
-                {
-                    ReadListenfd(_listenfd);
-                }
-                
-                // 检查clientfd
+                // 填充checkRead列表
+                checkRead.Clear();
+                checkRead.Add(_listenfd);
                 foreach (ClientState s in _clients.Values)
                 {
-                    Socket clientfd = s.socket;
-                    if (clientfd.Poll(0, SelectMode.SelectRead))
-                    {
-                        if (!ReadClientfd(clientfd))
-                        {
-                            // 此处break，是因为在ReadClientfd存在_clients.Remove(clientfd)
-                            break;
-                        }
-                    }
+                    checkRead.Add(s.socket);
                 }
                 
-                // 防止CPU占用过高
-                System.Threading.Thread.Sleep(1);
+                // Select
+                Socket.Select(checkRead, null, null, 1000);
+                // 检查可读对象
+                foreach (Socket s in checkRead)
+                {
+                    if (s == _listenfd)
+                    {
+                        ReadListenfd(s);
+                    }
+                    else
+                    {
+                        ReadClientfd(s);
+                    }
+                }
             }
         }
+        
 
         public static void ReadListenfd(Socket listenfd)
         {
@@ -108,6 +111,49 @@ namespace EchoServer
             
             return true;
         }
+        
+        // Poll状态检测
+        /*public static void Main(string[] args)
+        {
+            // Socket
+            _listenfd = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            
+            // Bind
+            IPAddress ipAdr = IPAddress.Parse("127.0.0.1");
+            IPEndPoint ipEp = new IPEndPoint(ipAdr, 8888);
+            _listenfd.Bind(ipEp);
+            
+            // Listen
+            _listenfd.Listen(0);
+            Console.WriteLine("[服务器]启动成功");
+            
+            // 主循环
+            while (true)
+            {
+                // 检查listenfd
+                if (_listenfd.Poll(0, SelectMode.SelectRead))
+                {
+                    ReadListenfd(_listenfd);
+                }
+                
+                // 检查clientfd
+                foreach (ClientState s in _clients.Values)
+                {
+                    Socket clientfd = s.socket;
+                    if (clientfd.Poll(0, SelectMode.SelectRead))
+                    {
+                        if (!ReadClientfd(clientfd))
+                        {
+                            // 此处break，是因为在ReadClientfd存在_clients.Remove(clientfd)
+                            break;
+                        }
+                    }
+                }
+                
+                // 防止CPU占用过高
+                System.Threading.Thread.Sleep(1);
+            }
+        }*/
         
         // Socket
         /*public static void Main(string[] args)
