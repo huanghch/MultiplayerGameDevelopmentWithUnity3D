@@ -2,10 +2,12 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
+using System.Linq;
 
 namespace EchoServer
 {
-    class ClientState
+    public class ClientState
     {
         public Socket socket;
         public byte[] readBuff = new byte[1024];
@@ -81,8 +83,12 @@ namespace EchoServer
             {
                 count = clientfd.Receive(state.readBuff);
             }
-            catch (SocketException ex) 
+            catch (SocketException ex)
             {
+                MethodInfo mei = typeof(EventHandler).GetMethod("OnDisconnect");
+                object[] ob = {state};
+                mei.Invoke(null, ob);
+
                 clientfd.Close();
                 _clients.Remove(clientfd);
                 Console.WriteLine("Receive SocketException " + ex.ToString());
@@ -92,6 +98,10 @@ namespace EchoServer
             //客户端关闭
             if(count == 0)
             {
+                MethodInfo mei = typeof(EventHandler).GetMethod("OnDisconnect");
+                object[] ob = {state};
+                mei.Invoke(null, ob);
+                
                 clientfd.Close();
                 _clients.Remove(clientfd);
                 Console.WriteLine("Socket Close");
@@ -101,6 +111,16 @@ namespace EchoServer
             //广播
             string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 0, count);
             Console.WriteLine("Receive: " + recvStr);
+
+            string[] split = recvStr.Split("|");
+            string msgName = split[0];
+            string msgArgs = split[1];
+            string funName = "Msg" + msgName;
+            MethodInfo mi = typeof(MsgHandler).GetMethod(funName);
+            object[] o = {state, msgArgs};
+            mi.Invoke(null, o);
+            
+            
             string sendStr = recvStr;
             byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
             
