@@ -26,7 +26,6 @@ public class CtrlHuman : BaseHuman
                 if (hit.collider.CompareTag("Terrain"))
                 {
                     MoveTo(hit.point);
-                    NetManager.Send("Enter|127.1.1.1,100,200,300,45");
                 }
             }
             
