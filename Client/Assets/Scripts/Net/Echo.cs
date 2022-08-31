@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using System.Net.Sockets;
 using UnityEngine.UI;
@@ -11,6 +12,8 @@ public class Echo : MonoBehaviour
     private Socket _socket;
     // 接收缓冲区
     private byte[] _readBuff = new byte[1024];
+    // 接收缓冲区的数据长度
+    private int _buffCount = 0;
     private string _recvStr = "";
     
     public Button btnConnect;
@@ -51,7 +54,7 @@ public class Echo : MonoBehaviour
             Socket socket = (Socket) ar.AsyncState;
             socket.EndConnect(ar);
             Debug.Log("Socket Connect Succ");
-            socket.BeginReceive(_readBuff, 0, 1024, 0, ReceiveCallback, socket);
+            socket.BeginReceive(_readBuff, _buffCount, 1024-_buffCount, 0, ReceiveCallback, socket);
         }
         catch (SocketException ex)
         {
@@ -61,10 +64,18 @@ public class Echo : MonoBehaviour
 
     public void Send()
     {
-        // Send
         string sendStr = inputField.text;
-        byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
+        
+        // 组装协议
+        byte[] bodyBytes = System.Text.Encoding.Default.GetBytes(sendStr);
+        Int16 len = (Int16) bodyBytes.Length;
+        byte[] lenBytes = BitConverter.GetBytes(len);
+        byte[] sendBytes = lenBytes.Concat(bodyBytes).ToArray();
+        
+        // Send
         _socket.BeginSend(sendBytes, 0, sendBytes.Length, 0, SendCallback, _socket);
+        Debug.Log("[Send]" + BitConverter.ToString(sendBytes));
+        
         
         // Recv
         // byte[] readBuff = new byte[1024];
@@ -95,14 +106,45 @@ public class Echo : MonoBehaviour
         {
             Socket socket = (Socket) ar.AsyncState;
             int count = socket.EndReceive(ar);
-            string s = System.Text.Encoding.Default.GetString(_readBuff, 0, count);
-            _recvStr = string.Format("{0}\n{1}", s, _recvStr);
 
-            socket.BeginReceive(_readBuff, 0, 1024, 0, ReceiveCallback, socket);
+            _buffCount += count;
+            // 处理二进制消息
+            OnReceiveData();
+            // 继续接收数据
+            socket.BeginReceive(_readBuff, _buffCount, 1024 - _buffCount, 0, ReceiveCallback, socket);
         }
         catch (SocketException ex)
         {
             Debug.Log("Socket Receive fail" + ex.ToString());
         }
+    }
+
+    public void OnReceiveData()
+    {
+        Debug.Log("[Recv 1] buffCount = " + _buffCount);
+        Debug.Log("[Recv 2] readbuff = " + BitConverter.ToString(_readBuff));
+        
+        // 消息长度
+        if (_buffCount <= 2) return;
+        Int16 bodyLength = BitConverter.ToInt16(_readBuff, 0);
+        Debug.Log("[Recv 3] bodyLength = " + bodyLength);
+        
+        // 消息体
+        if (_buffCount < 2 + bodyLength) return;
+        string s = System.Text.Encoding.Default.GetString(_readBuff, 2, bodyLength);
+        Debug.Log("[Recv 4] s = " + s);
+        
+        // 更新缓冲区
+        int start = 2 + bodyLength;
+        int count = _buffCount - start;
+        Array.Copy(_readBuff,start,_readBuff,0,count);
+        _buffCount -= start;
+        Debug.Log("[Recv 5] buffCount = " + _buffCount);
+        
+        // 消息处理
+        _recvStr = string.Format("{0}\n{1}", s, _recvStr);
+        
+        // 继续读取消息
+        OnReceiveData();
     }
 }

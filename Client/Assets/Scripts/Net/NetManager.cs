@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using System.Net.Sockets;
 
@@ -99,7 +100,10 @@ public static class NetManager
         if (!_socket.Connected) return;
         
         // Send
-        byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
+        byte[] bodyBytes = System.Text.Encoding.Default.GetBytes(sendStr);
+        Int16 len = (Int16) bodyBytes.Length;
+        byte[] lenBytes = BitConverter.GetBytes(len);
+        byte[] sendBytes = lenBytes.Concat(bodyBytes).ToArray();
         _socket.BeginSend(sendBytes, 0, sendBytes.Length, 0, SendCallback, _socket);
     }
 
