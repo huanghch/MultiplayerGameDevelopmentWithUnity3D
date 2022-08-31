@@ -16,6 +16,13 @@ public class Echo : MonoBehaviour
     private int _buffCount = 0;
     private string _recvStr = "";
     
+    // 定义发送缓冲区
+    private byte[] _sendBytes = new byte[1024];
+    // 缓冲区偏移值
+    private int _readIndex = 0;
+    // 缓冲区剩余长度
+    private int _sendLength = 0;
+    
     public Button btnConnect;
     public Button btnSend;
     public InputField inputField;
@@ -71,9 +78,12 @@ public class Echo : MonoBehaviour
         Int16 len = (Int16) bodyBytes.Length;
         byte[] lenBytes = BitConverter.GetBytes(len);
         byte[] sendBytes = lenBytes.Concat(bodyBytes).ToArray();
+
+        _sendLength = sendBytes.Length;
+        _readIndex = 0;
         
         // Send
-        _socket.BeginSend(sendBytes, 0, sendBytes.Length, 0, SendCallback, _socket);
+        _socket.BeginSend(sendBytes, 0, _sendLength, 0, SendCallback, _socket);
         Debug.Log("[Send]" + BitConverter.ToString(sendBytes));
         
         
@@ -92,7 +102,16 @@ public class Echo : MonoBehaviour
         {
             Socket socket = (Socket) ar.AsyncState;
             int count = socket.EndSend(ar);
-            Debug.Log("Socket Send succ" + count);
+
+            _readIndex += count;
+            _sendLength -= count;
+
+            if (_sendLength > 0)
+            {
+                socket.BeginSend(_sendBytes, _readIndex, _sendLength, 0, SendCallback, socket);
+            }
+            
+            //Debug.Log("Socket Send succ" + count);
         }
         catch (SocketException ex)
         {
