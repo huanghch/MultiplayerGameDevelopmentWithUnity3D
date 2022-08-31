@@ -91,9 +91,9 @@ namespace EchoServer
             }
             catch (SocketException ex)
             {
-                MethodInfo mei = typeof(EventHandler).GetMethod("OnDisconnect");
-                object[] ob = {state};
-                mei.Invoke(null, ob);
+                // MethodInfo mei = typeof(EventHandler).GetMethod("OnDisconnect");
+                // object[] ob = {state};
+                // mei.Invoke(null, ob);
 
                 clientfd.Close();
                 clients.Remove(clientfd);
@@ -104,9 +104,9 @@ namespace EchoServer
             //客户端关闭
             if(count == 0)
             {
-                MethodInfo mei = typeof(EventHandler).GetMethod("OnDisconnect");
-                object[] ob = {state};
-                mei.Invoke(null, ob);
+                // MethodInfo mei = typeof(EventHandler).GetMethod("OnDisconnect");
+                // object[] ob = {state};
+                // mei.Invoke(null, ob);
                 
                 clientfd.Close();
                 clients.Remove(clientfd);
@@ -114,10 +114,10 @@ namespace EchoServer
                 return false;
             }
             
-            //广播
-            string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 0, count);
+            //广播 - 大乱斗
+            /*string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 0, count);
             Console.WriteLine("Receive: " + recvStr);
-
+            
             string[] split = recvStr.Split("|");
             string msgName = split[0];
             string msgArgs = split[1];
@@ -126,10 +126,19 @@ namespace EchoServer
             object[] o = {state, msgArgs};
             mi.Invoke(null, o);
             
-            
             string sendStr = recvStr;
             byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
             
+            foreach (ClientState cs in clients.Values) 
+            {
+                cs.socket.Send(sendBytes);
+            }*/
+            
+            // 广播 - 聊天室
+            string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 2, count - 2);
+            Console.WriteLine("Receive " + recvStr);
+            byte[] sendBytes = new byte[count];
+            Array.Copy(state.readBuff, 0, sendBytes, 0, count);
             foreach (ClientState cs in clients.Values) 
             {
                 cs.socket.Send(sendBytes);

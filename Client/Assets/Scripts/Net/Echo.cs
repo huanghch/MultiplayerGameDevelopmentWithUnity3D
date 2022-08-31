@@ -110,6 +110,10 @@ public class Echo : MonoBehaviour
             _buffCount += count;
             // 处理二进制消息
             OnReceiveData();
+            
+            // 手动模拟粘包
+            System.Threading.Thread.Sleep(1000*10);
+            
             // 继续接收数据
             socket.BeginReceive(_readBuff, _buffCount, 1024 - _buffCount, 0, ReceiveCallback, socket);
         }
