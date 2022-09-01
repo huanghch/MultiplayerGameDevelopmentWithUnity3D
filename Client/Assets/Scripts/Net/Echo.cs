@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System.Net.Sockets;
@@ -22,6 +23,8 @@ public class Echo : MonoBehaviour
     private int _readIndex = 0;
     // 缓冲区剩余长度
     private int _sendLength = 0;
+    // 发送队列
+    Queue<ByteArray> writeQueue = new Queue<ByteArray>();
     
     public Button btnConnect;
     public Button btnSend;
@@ -79,12 +82,24 @@ public class Echo : MonoBehaviour
         byte[] lenBytes = BitConverter.GetBytes(len);
         byte[] sendBytes = lenBytes.Concat(bodyBytes).ToArray();
 
-        _sendLength = sendBytes.Length;
-        _readIndex = 0;
+        // _sendLength = sendBytes.Length;
+        // _readIndex = 0;
         
+        // ByteArray
+        ByteArray ba = new ByteArray(sendBytes);
+        int count = 0;
+        lock(writeQueue){
+            writeQueue.Enqueue(ba);
+            count = writeQueue.Count;
+        }
+
         // Send
-        _socket.BeginSend(sendBytes, 0, _sendLength, 0, SendCallback, _socket);
-        Debug.Log("[Send]" + BitConverter.ToString(sendBytes));
+        if (count == 1)
+        {
+            _socket.BeginSend(sendBytes, 0, _sendLength, 0, SendCallback, _socket);
+            Debug.Log("[Send]" + BitConverter.ToString(sendBytes));
+        }
+
         
         
         // Recv
@@ -102,14 +117,33 @@ public class Echo : MonoBehaviour
         {
             Socket socket = (Socket) ar.AsyncState;
             int count = socket.EndSend(ar);
-
-            _readIndex += count;
-            _sendLength -= count;
-
-            if (_sendLength > 0)
-            {
-                socket.BeginSend(_sendBytes, _readIndex, _sendLength, 0, SendCallback, socket);
+            
+            //判断是否发送完整  
+            ByteArray ba;
+            lock(writeQueue){
+                ba = writeQueue.First();
             }
+            ba.readIdx+=count;
+            if(ba.length == 0){   //发送完整
+                lock(writeQueue){
+                    writeQueue.Dequeue();
+                    ba = writeQueue.First();
+                }
+            }
+
+            if (ba != null)
+            {
+                //发送不完整，或发送完整且存在第二条数据
+                socket.BeginSend(ba.bytes, ba.readIdx, ba.length, 0, SendCallback, socket);
+            }
+
+            // _readIndex += count;
+            // _sendLength -= count;
+
+            // if (_sendLength > 0)
+            // {
+            //     socket.BeginSend(_sendBytes, _readIndex, _sendLength, 0, SendCallback, socket);
+            // }
             
             //Debug.Log("Socket Send succ" + count);
         }
@@ -169,5 +203,27 @@ public class Echo : MonoBehaviour
         
         // 继续读取消息
         OnReceiveData();
+    }
+}
+
+public class ByteArray
+{
+    // 缓冲区
+    public byte[] bytes;
+    // 读写位置
+    public int readIdx = 0;
+    public int writeIdx = 0;
+    // 数据长度
+    public int length
+    {
+        get { return writeIdx - readIdx; }
+    }
+    
+    // 构造函数
+    public ByteArray(byte[] defaultBytes)
+    {
+        bytes = defaultBytes;
+        readIdx = 0;
+        writeIdx = defaultBytes.Length;
     }
 }
