@@ -4,6 +4,13 @@ using System.Linq;
 using UnityEngine;
 using System.Net.Sockets;
 
+public enum NetEvent
+{
+    ConnectSucc = 1,
+    ConnectFail = 2,
+    Close = 3,
+}
+
 public static class NetManager
 {
     // private const string IP = "127.0.0.1";
@@ -12,7 +19,15 @@ public static class NetManager
     // 定义套接字
     private static Socket _socket;
     // 接收缓冲区
-    private static byte[] _readBuff = new byte[1024];
+    private static byte[] _readBuff;
+    // 写入队列
+    private static Queue<ByteArray> _writeQueue;
+    // 事件委托列表
+    public delegate void EventListener(string err);
+    // 事件监听列表
+    private static Dictionary<NetEvent, EventListener> _eventListeners = new Dictionary<NetEvent, EventListener>();
+
+
     // 委托类型
     public delegate void MsgListener(String str);
     // 监听列表
@@ -121,5 +136,37 @@ public static class NetManager
         }
     }
 
-
+    //添加事件监听
+    public static void AddEventListener(NetEvent netEvent, EventListener listener)
+    {
+        //添加事件
+        if (_eventListeners.ContainsKey(netEvent))
+        {
+            _eventListeners[netEvent] += listener;
+        }
+        //新增事件
+        else
+        {
+            _eventListeners[netEvent] = listener;
+        }
+    }
+    //删除事件监听
+    public static void RemoveEventListener(NetEvent netEvent, EventListener listener)
+    {
+        if (_eventListeners.ContainsKey(netEvent))
+        {
+            _eventListeners[netEvent] -= listener;
+            //删除
+            if(_eventListeners[netEvent] == null)
+            {
+                _eventListeners.Remove(netEvent);
+            } 
+        }
+    } 
+    //分发事件
+    private static void FireEvent(NetEvent netEvent, String err){
+        if(_eventListeners.ContainsKey(netEvent)){
+            _eventListeners[netEvent](err);
+        }
+    }
 }
