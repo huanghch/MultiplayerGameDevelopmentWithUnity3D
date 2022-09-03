@@ -18,11 +18,11 @@ public class Echo : MonoBehaviour
     private string _recvStr = "";
     
     // 定义发送缓冲区
-    private byte[] _sendBytes = new byte[1024];
+    // private byte[] _sendBytes = new byte[1024];
     // 缓冲区偏移值
-    private int _readIndex = 0;
+    // private int _readIndex = 0;
     // 缓冲区剩余长度
-    private int _sendLength = 0;
+    // private int _sendLength = 0;
     // 发送队列
     Queue<ByteArray> writeQueue = new Queue<ByteArray>();
     
@@ -96,7 +96,7 @@ public class Echo : MonoBehaviour
         // Send
         if (count == 1)
         {
-            _socket.BeginSend(sendBytes, 0, _sendLength, 0, SendCallback, _socket);
+            _socket.BeginSend(ba.bytes, ba.readIdx, ba.length, 0, SendCallback, _socket);
             Debug.Log("[Send]" + BitConverter.ToString(sendBytes));
         }
 
@@ -206,24 +206,3 @@ public class Echo : MonoBehaviour
     }
 }
 
-public class ByteArray
-{
-    // 缓冲区
-    public byte[] bytes;
-    // 读写位置
-    public int readIdx = 0;
-    public int writeIdx = 0;
-    // 数据长度
-    public int length
-    {
-        get { return writeIdx - readIdx; }
-    }
-    
-    // 构造函数
-    public ByteArray(byte[] defaultBytes)
-    {
-        bytes = defaultBytes;
-        readIdx = 0;
-        writeIdx = defaultBytes.Length;
-    }
-}
