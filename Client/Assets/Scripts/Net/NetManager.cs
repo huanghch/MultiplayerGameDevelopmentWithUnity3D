@@ -36,10 +36,14 @@ public static class NetManager
     public delegate void MsgListener(MsgBase str);
     // 消息监听列表
     private static Dictionary<string, MsgListener> _msgListeners = new Dictionary<string, MsgListener>();
+    // 每一次Update处理的消息量
+    private readonly static int MAX_MESSAGE_FIRE = 10;
     
-    // // 消息列表
-    // private static List<String> _msgList = new List<string>();
-    //
+    // 消息列表
+    private static List<MsgBase> _msgList = new List<MsgBase>();
+    private static int msgCount = 0;
+    
+    
     // // Update
     // public static void Update()
     // {
@@ -98,6 +102,10 @@ public static class NetManager
         _writeQueue = new Queue<ByteArray>();
         _isConnecting = false;
         _isClosing = false;
+        
+        // 消息列表
+        _msgList = new List<MsgBase>();
+        msgCount = 0;
     }
 
     public static void ConnectCallback(IAsyncResult ar)
@@ -109,7 +117,7 @@ public static class NetManager
             Debug.Log("Socket Connect Succ");
             FireEvent(NetEvent.ConnectSucc,"");
             _isConnecting = false;
-            //socket.BeginReceive(_readBuff, 0, 1024, 0, ReceiveCallback, socket);
+            socket.BeginReceive(_readBuff.bytes, _readBuff.writeIdx, _readBuff.remain, 0, ReceiveCallback, socket);
         }
         catch (SocketException ex)
         {
@@ -137,23 +145,79 @@ public static class NetManager
         }
     }
     
-    // public static void ReceiveCallback(IAsyncResult ar)
-    // {
-    //     try
-    //     {
-    //         Socket socket = (Socket) ar.AsyncState;
-    //         int count = socket.EndReceive(ar);
-    //         string recvStr = System.Text.Encoding.Default.GetString(_readBuff, 0, count);
-    //         _msgList.Add(recvStr);
-    //
-    //         socket.BeginReceive(_readBuff, 0, 1024, 0, ReceiveCallback, socket);
-    //     }
-    //     catch (SocketException ex)
-    //     {
-    //         Debug.Log("Socket Receive fail" + ex.ToString());
-    //     }
-    // }
-    //
+    public static void ReceiveCallback(IAsyncResult ar)
+    {
+        try
+        {
+            Socket socket = (Socket) ar.AsyncState;
+            int count = socket.EndReceive(ar);
+            // 接收到Fin信号，count == 0
+            if (count == 0)
+            {
+                Close();
+                return;
+            }
+
+            _readBuff.writeIdx += count;
+            OnReceiveData();
+
+            if (_readBuff.remain < 8)
+            {
+                _readBuff.MoveBytes();
+                _readBuff.ReSize(_readBuff.length * 2);
+            }
+            socket.BeginReceive(_readBuff.bytes, _readBuff.writeIdx, _readBuff.remain, 0, ReceiveCallback, socket);
+        }
+        catch (SocketException ex)
+        {
+            Debug.Log("Socket Receive fail" + ex.ToString());
+        }
+    }
+    
+    public static void OnReceiveData()
+    {
+        // 消息长度
+        if (_readBuff.length <= 2) return;
+        // 获取消息体长度
+        int readIdx = _readBuff.readIdx;
+        byte[] bytes = _readBuff.bytes;
+        Int16 bodyLength = (Int16) ((bytes[readIdx + 1] << 8) | bytes[readIdx]);
+        if (_readBuff.length < bodyLength + 2)
+        {
+            return;
+        }
+        _readBuff.readIdx += 2;             // 读完消息体长度
+
+        // 解析协议名
+        int nameCount = 0;
+        string protoName = MsgBase.DecodeName(_readBuff.bytes, _readBuff.readIdx, out nameCount);
+        if (protoName == "")
+        {
+            Debug.Log("OnReceiveData MsgBase.DecodeName fail");
+            return;
+        }
+        _readBuff.readIdx += nameCount;     // 读完协议名
+        
+        // 解析协议体
+        int bodyCount = bodyLength - nameCount;
+        MsgBase msgBase = MsgBase.Decode(protoName, _readBuff.bytes, _readBuff.readIdx, bodyCount);
+        _readBuff.readIdx += bodyCount;     // 读完协议体
+        _readBuff.CheckAndMoveBytes();
+        
+        // 添加到消息队列
+        lock (_msgList)
+        {
+            _msgList.Add(msgBase);
+        }
+        msgCount++;
+        
+        // 继续读取消息
+        if (_readBuff.length > 2)
+        {
+            OnReceiveData();
+        }
+    }
+    
     public static void Send(MsgBase msg)
     {
         // 状态判断
