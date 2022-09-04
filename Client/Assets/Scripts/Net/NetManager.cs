@@ -32,10 +32,11 @@ public static class NetManager
     // 是否正在关闭连接
     private static bool _isClosing = false;
 
-    // // 委托类型
-    // public delegate void MsgListener(String str);
-    // // 监听列表
-    // private static Dictionary<string, MsgListener> _listeners = new Dictionary<string, MsgListener>();
+    // 消息委托类型
+    public delegate void MsgListener(MsgBase str);
+    // 消息监听列表
+    private static Dictionary<string, MsgListener> _msgListeners = new Dictionary<string, MsgListener>();
+    
     // // 消息列表
     // private static List<String> _msgList = new List<string>();
     //
@@ -231,11 +232,36 @@ public static class NetManager
         }
     }
     
-    // 添加监听
-    // public static void AddListener(string msgName, MsgListener listener)
-    // {
-    //     _listeners[msgName] = listener;
-    // }
+    // 添加消息监听
+    public static void AddMsgListener(string msgName, MsgListener listener)
+    {
+        //添加
+        if (_msgListeners.ContainsKey(msgName)){
+            _msgListeners[msgName] += listener;
+        }
+        //新增
+        else{
+            _msgListeners[msgName] = listener;
+        }
+    }
+    // 删除消息监听
+    public static void RemoveMsgListener(string msgName, MsgListener listener)
+    {
+        if (_msgListeners.ContainsKey(msgName)){
+            _msgListeners[msgName] -= listener;
+            //删除
+            if(_msgListeners[msgName] == null){
+                _msgListeners.Remove(msgName);
+            } 
+        }
+    }
+    // 分发消息
+    private static void FireMsg(string msgName, MsgBase msgBase)
+    {
+        if(_msgListeners.ContainsKey(msgName)){
+            _msgListeners[msgName](msgBase);
+        }
+    } 
 
     //添加事件监听
     public static void AddEventListener(NetEvent netEvent, EventListener listener)
