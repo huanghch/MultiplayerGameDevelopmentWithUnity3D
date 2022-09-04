@@ -153,34 +153,85 @@ public static class NetManager
     //     }
     // }
     //
-    // public static void Send(string sendStr)
-    // {
-    //     if (_socket == null) return;
-    //     if (!_socket.Connected) return;
-    //     
-    //     // Send
-    //     byte[] bodyBytes = System.Text.Encoding.Default.GetBytes(sendStr);
-    //     Int16 len = (Int16) bodyBytes.Length;
-    //     byte[] lenBytes = BitConverter.GetBytes(len);
-    //     byte[] sendBytes = lenBytes.Concat(bodyBytes).ToArray();
-    //     _socket.BeginSend(sendBytes, 0, sendBytes.Length, 0, SendCallback, _socket);
-    // }
-    //
-    // public static void SendCallback(IAsyncResult ar)
-    // {
-    //     try
-    //     {
-    //         Socket socket = (Socket) ar.AsyncState;
-    //         int count = socket.EndSend(ar);
-    //         //Debug.Log("Socket Send succ" + count);
-    //     }
-    //     catch (SocketException ex)
-    //     {
-    //         Debug.Log("Socket Send fail" + ex.ToString());
-    //     }
-    // }
-    //
-    // // 添加监听
+    public static void Send(MsgBase msg)
+    {
+        // 状态判断
+        if (_socket == null || !_socket.Connected) return;
+        if ( _isConnecting) return;
+        if (_isClosing) return;
+
+        // 数据编码
+        byte[] nameBytes = MsgBase.EncodeName(msg);
+        byte[] bodyBytes = MsgBase.Encode(msg);
+        int len = nameBytes.Length + bodyBytes.Length;
+        byte[] sendBytes = new byte[2 + len];
+        
+        // 组装长度
+        sendBytes[0] = (byte) (len % 256);
+        sendBytes[1] = (byte) (len / 256);
+        // 组装名字
+        Array.Copy(nameBytes, 0, sendBytes, 2, nameBytes.Length);
+        // 组装消息体
+        Array.Copy(bodyBytes,0,sendBytes,2+nameBytes.Length,bodyBytes.Length);
+        // 写入队列
+        ByteArray ba = new ByteArray(sendBytes);
+        int count = 0;
+        lock (_writeQueue)
+        {
+            _writeQueue.Enqueue(ba);
+            count = _writeQueue.Count;
+        }
+
+        if (count == 1)
+        {
+            _socket.BeginSend(sendBytes, 0, sendBytes.Length, 0, SendCallback, _socket);
+        }
+    }
+    
+    public static void SendCallback(IAsyncResult ar)
+    {
+        try
+        {
+            Socket socket = (Socket) ar.AsyncState;
+            if (socket == null || !socket.Connected)
+            {
+                return;
+            }
+            int count = socket.EndSend(ar);
+
+            ByteArray ba;
+            lock (_writeQueue)
+            {
+                ba = _writeQueue.First();
+            }
+            // 完整发送
+            ba.readIdx += count;
+            if (ba.length == 0)
+            {
+                lock (_writeQueue)
+                {
+                    _writeQueue.Dequeue();
+                    ba = _writeQueue.First();
+                }
+            }
+
+            if (ba != null)
+            {
+                socket.BeginSend(ba.bytes, ba.readIdx, ba.length, 0, SendCallback, socket);
+            }
+            else if (_isClosing)
+            {
+                socket.Close();
+            }
+            //Debug.Log("Socket Send succ" + count);
+        }
+        catch (SocketException ex)
+        {
+            Debug.Log("Socket Send fail" + ex.ToString());
+        }
+    }
+    
+    // 添加监听
     // public static void AddListener(string msgName, MsgListener listener)
     // {
     //     _listeners[msgName] = listener;
