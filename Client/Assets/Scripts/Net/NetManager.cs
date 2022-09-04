@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System.Net.Sockets;
+using Net.Proto;
 
 public enum NetEvent
 {
@@ -43,11 +44,21 @@ public static class NetManager
     private static List<MsgBase> _msgList = new List<MsgBase>();
     private static int _msgCount = 0;
     
+    // 是否启用心跳
+    public static bool isUsingPing = true;
+    // 心跳间隔事件
+    public static int pingInterval = 30;
+    // 上一次发送PING的时间
+    private static float _lastPingTime = 0;
+    // 上一次收到PONG的时间
+    private static float _lastPongTime = 0;
+    
     
     // Update
     public static void Update()
     {
         MsgUpdate();
+        PingUpdate();
     }
 
     private static void MsgUpdate()
@@ -123,6 +134,14 @@ public static class NetManager
         // 消息列表
         _msgList = new List<MsgBase>();
         _msgCount = 0;
+        
+        // PING & PONG
+        _lastPingTime = Time.time;
+        _lastPongTime = Time.time;
+        if (!_msgListeners.ContainsKey("MsgPong"))
+        {
+            AddMsgListener("MsgPong", OnMsgPong);
+        }
     }
 
     public static void ConnectCallback(IAsyncResult ar)
@@ -311,6 +330,34 @@ public static class NetManager
         {
             Debug.Log("Socket Send fail" + ex.ToString());
         }
+    }
+    
+    // 心跳，发送Ping协议
+    private static void PingUpdate()
+    {
+        // 是否启用
+        if (!isUsingPing)
+        {
+            return;
+        }
+        // 发送PING
+        if (Time.time - _lastPingTime > pingInterval)
+        {
+            MsgPing msgPing = new MsgPing();
+            Send(msgPing);
+            _lastPingTime = Time.time;
+        }
+        // 检查Pong时间
+        if (Time.time - _lastPongTime > pingInterval * 4)
+        {
+            Close();
+        }
+    }
+    
+    // 监听Pong协议
+    private static void OnMsgPong(MsgBase msgBase)
+    {
+        _lastPingTime = Time.time;
     }
     
     // 添加消息监听

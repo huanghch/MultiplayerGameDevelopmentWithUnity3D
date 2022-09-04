@@ -1,25 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class MsgMove : MsgBase
+namespace Net.Proto
 {
-    public MsgMove()
+    public class MsgMove : MsgBase
     {
-        protoName = "MsgMove";
+        public MsgMove()
+        {
+            protoName = "MsgMove";
+        }
+
+        public int x = 0;
+        public int y = 0;
+        public int z = 0;
     }
 
-    public int x = 0;
-    public int y = 0;
-    public int z = 0;
-}
-
-public class MsgAttack : MsgBase
-{
-    public MsgAttack()
+    public class MsgAttack : MsgBase
     {
-        protoName = "MsgAttack";
-    }
+        public MsgAttack()
+        {
+            protoName = "MsgAttack";
+        }
 
-    public string desc = "127.0.0.1:6543";
+        public string desc = "127.0.0.1:6543";
+    }
 }
