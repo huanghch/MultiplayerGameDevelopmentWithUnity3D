@@ -41,28 +41,45 @@ public static class NetManager
     
     // 消息列表
     private static List<MsgBase> _msgList = new List<MsgBase>();
-    private static int msgCount = 0;
+    private static int _msgCount = 0;
     
     
-    // // Update
-    // public static void Update()
-    // {
-    //     if (_msgList.Count <= 0) return;
-    //
-    //     String msgStr = _msgList[0];
-    //     _msgList.RemoveAt(0);
-    //
-    //     string[] split = msgStr.Split('|');
-    //     string msgName = split[0];
-    //     string msgArgs = split[1];
-    //     
-    //     // 监听回调
-    //     if (_listeners.ContainsKey(msgName))
-    //     {
-    //         _listeners[msgName](msgArgs);
-    //     }
-    // }
-    //
+    // Update
+    public static void Update()
+    {
+        MsgUpdate();
+    }
+
+    private static void MsgUpdate()
+    {
+        // 初步判断，提升效率
+        if (_msgCount == 0) return;
+        
+        // 处理消息
+        for (int i = 0; i < MAX_MESSAGE_FIRE; i++)
+        {
+            MsgBase msgBase = null;
+            lock (_msgList)
+            {
+                if (_msgList.Count > 0)
+                {
+                    msgBase = _msgList[0];
+                    _msgList.RemoveAt(0);
+                    _msgCount--;
+                }
+            }
+
+            if (msgBase != null)
+            {
+                FireMsg(msgBase.protoName, msgBase);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    
     // // 获取描述
     // public static string GetDesc()
     // {
@@ -105,7 +122,7 @@ public static class NetManager
         
         // 消息列表
         _msgList = new List<MsgBase>();
-        msgCount = 0;
+        _msgCount = 0;
     }
 
     public static void ConnectCallback(IAsyncResult ar)
@@ -209,7 +226,7 @@ public static class NetManager
         {
             _msgList.Add(msgBase);
         }
-        msgCount++;
+        _msgCount++;
         
         // 继续读取消息
         if (_readBuff.length > 2)
