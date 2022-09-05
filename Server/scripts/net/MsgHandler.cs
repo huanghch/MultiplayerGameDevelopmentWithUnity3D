@@ -1,6 +1,6 @@
-﻿using System.Text;
-
-namespace EchoServer;
+﻿using System;
+using System.Text;
+using EchoServer;
 
 public class MsgHandler
 {
@@ -27,7 +27,7 @@ public class MsgHandler
         string sendStr = "Enter|" + msgArgs;
         foreach (ClientState cs in MainClass.clients.Values)
         {
-            MainClass.Send(cs, sendStr);
+            //MainClass.Send(cs, sendStr);
         }
     }
 
@@ -52,6 +52,6 @@ public class MsgHandler
             sendStr.Append(cs.hp);
             sendStr.Append(',');
         }
-        MainClass.Send(c, sendStr.ToString());
+        //MainClass.Send(c, sendStr.ToString());
     }
 }

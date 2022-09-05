@@ -2,8 +2,11 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using System.Text.Json;
+using Net.Proto;
 
 namespace EchoServer
 {
@@ -28,6 +31,11 @@ namespace EchoServer
 
         public static void Main(string[] args)
         {
+
+        }
+        
+        /*public static void Main(string[] args)
+        {
             // Socket
             _listenfd = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
@@ -42,7 +50,7 @@ namespace EchoServer
             
             // checkRead
             List<Socket> checkRead = new List<Socket>();
-
+        
             while (true)
             {
                 // 填充checkRead列表
@@ -70,7 +78,7 @@ namespace EchoServer
             }
         }
         
-
+        
         public static void ReadListenfd(Socket listenfd)
         {
             Console.WriteLine("Accept");
@@ -79,7 +87,7 @@ namespace EchoServer
             state.socket = clientfd;
             clients.Add(clientfd, state);
         }
-
+        
         public static bool ReadClientfd(Socket clientfd)
         {
             ClientState state = clients[clientfd];
@@ -94,13 +102,13 @@ namespace EchoServer
                 // MethodInfo mei = typeof(EventHandler).GetMethod("OnDisconnect");
                 // object[] ob = {state};
                 // mei.Invoke(null, ob);
-
+        
                 clientfd.Close();
                 clients.Remove(clientfd);
                 Console.WriteLine("Receive SocketException " + ex.ToString());
                 return false;
             }
-
+        
             //客户端关闭
             if(count == 0)
             {
@@ -132,7 +140,7 @@ namespace EchoServer
             foreach (ClientState cs in clients.Values) 
             {
                 cs.socket.Send(sendBytes);
-            }*/
+            }#1#
             
             // 广播 - 聊天室
             string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 2, count - 2);
@@ -146,12 +154,12 @@ namespace EchoServer
             
             return true;
         }
-
+        
         public static void Send(ClientState cs, string sendStr)
         {
             byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
             cs.socket.Send(sendBytes);
-        }
+        }*/
         
         // Poll状态检测
         /*public static void Main(string[] args)

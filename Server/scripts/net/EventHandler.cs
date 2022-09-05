@@ -1,4 +1,5 @@
-﻿namespace EchoServer;
+﻿using System;
+using EchoServer;
 
 public class EventHandler
 {
