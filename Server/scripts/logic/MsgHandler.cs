@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
-using EchoServer;
+using Net;
+using Server;
 
 public class MsgHandler
 {

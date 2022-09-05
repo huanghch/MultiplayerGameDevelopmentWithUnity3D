@@ -19,10 +19,10 @@ public class Main : MonoBehaviour
     void Start()
     {
         // 网络模块
-        NetManager.AddListener("Enter", OnEnter);
-        NetManager.AddListener("List", OnList);
-        NetManager.AddListener("Move", OnMove);
-        NetManager.AddListener("Leave", OnLeave);
+        // NetManager.AddListener("Enter", OnEnter);
+        // NetManager.AddListener("List", OnList);
+        // NetManager.AddListener("Move", OnMove);
+        // NetManager.AddListener("Leave", OnLeave);
         NetManager.Connect(IP, Port);
         
         // 添加一个角色
@@ -31,13 +31,13 @@ public class Main : MonoBehaviour
         float z = Random.Range(-5, 5);
         obj.transform.position = new Vector3(x, 0, z);
         myHuman = obj.AddComponent<CtrlHuman>();
-        myHuman.desc = NetManager.GetDesc();
+        //myHuman.desc = NetManager.GetDesc();
         
         // 发送Enter协议
         Vector3 pos = myHuman.transform.position;
         Vector3 eul = myHuman.transform.eulerAngles;
         StringBuilder str = new StringBuilder("Enter|");
-        str.Append(NetManager.GetDesc());
+        //str.Append(NetManager.GetDesc());
         str.Append(",");
         str.Append(pos.x);
         str.Append(",");
@@ -46,10 +46,10 @@ public class Main : MonoBehaviour
         str.Append(pos.z);
         str.Append(",");
         str.Append(eul.y);
-        NetManager.Send(str.ToString());
+        //NetManager.Send(str.ToString());
         
         // 请求玩家列表
-        NetManager.Send("List|");
+        //NetManager.Send("List|");
 
     }
 
@@ -72,7 +72,7 @@ public class Main : MonoBehaviour
         float eulY = float.Parse(split[4]);
         
         // 是自己
-        if (desc == NetManager.GetDesc()) return;
+        //if (desc == NetManager.GetDesc()) return;
         
         // 添加一个角色
         GameObject obj = (GameObject) Instantiate(humanPrefab);
@@ -97,7 +97,7 @@ public class Main : MonoBehaviour
             float eulY = float.Parse(split[i * 6 + 4]);
             int hp = int.Parse(split[i * 6 + 5]);
             // 是自己
-            if (desc == NetManager.GetDesc()) return;
+            //if (desc == NetManager.GetDesc()) return;
             // 添加一个角色
             GameObject obj = (GameObject) Instantiate(humanPrefab);
             obj.transform.position = new Vector3(x, y, z);

@@ -1,4 +1,5 @@
-﻿namespace Net.Proto
+﻿using Net;
+namespace Proto
 {
     public class MsgPing : MsgBase
     {
