@@ -18,11 +18,11 @@ public class MsgHandler
         float eulY = float.Parse(split[4]);
         
         // 赋值
-        c.hp = 100;
-        c.x = x;
-        c.y = y;
-        c.z = z;
-        c.eulY = eulY;
+        // c.hp = 100;
+        // c.x = x;
+        // c.y = y;
+        // c.z = z;
+        // c.eulY = eulY;
         
         // 广播
         string sendStr = "Enter|" + msgArgs;
@@ -39,19 +39,18 @@ public class MsgHandler
         StringBuilder sendStr = new StringBuilder("List|");
         foreach (ClientState cs in MainClass.clients.Values)
         {
-            
-            sendStr.Append(cs.socket.RemoteEndPoint);
-            sendStr.Append(',');
-            sendStr.Append(cs.x);
-            sendStr.Append(',');
-            sendStr.Append(cs.y);
-            sendStr.Append(',');
-            sendStr.Append(cs.z);
-            sendStr.Append(',');
-            sendStr.Append(cs.eulY);
-            sendStr.Append(',');
-            sendStr.Append(cs.hp);
-            sendStr.Append(',');
+            // sendStr.Append(cs.socket.RemoteEndPoint);
+            // sendStr.Append(',');
+            // sendStr.Append(cs.x);
+            // sendStr.Append(',');
+            // sendStr.Append(cs.y);
+            // sendStr.Append(',');
+            // sendStr.Append(cs.z);
+            // sendStr.Append(',');
+            // sendStr.Append(cs.eulY);
+            // sendStr.Append(',');
+            // sendStr.Append(cs.hp);
+            // sendStr.Append(',');
         }
         //MainClass.Send(c, sendStr.ToString());
     }
