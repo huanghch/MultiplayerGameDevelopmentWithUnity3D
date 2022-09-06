@@ -20,7 +20,7 @@ namespace Server
 
         public static void Main(string[] args)
         {
-
+            NetManager.StartLoop(8888);
         }
         
         /*public static void Main(string[] args)

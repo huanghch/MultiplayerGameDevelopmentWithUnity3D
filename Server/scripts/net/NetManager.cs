@@ -4,6 +4,8 @@ using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using Server.logic;
+using EventHandler = System.EventHandler;
 
 namespace Net
 {
@@ -177,7 +179,7 @@ namespace Net
         public static void Close(ClientState state)
         {
             //事件分发
-            MethodInfo mei = typeof(EventHandler).GetMethod("OnDisconnect");
+            MethodInfo mei = typeof(Server.logic.EventHandler).GetMethod("OnDisconnect");
             object[] ob = {state};
             mei.Invoke(null, ob);
             //关闭
@@ -188,7 +190,7 @@ namespace Net
         public static void Timer()
         {
             // 消息分发
-            MethodInfo mei = typeof(EventHandler).GetMethod("OnTimer");
+            MethodInfo mei = typeof(Server.logic.EventHandler).GetMethod("OnTimer");
             object[] ob = { };
             mei.Invoke(null, ob);
         }

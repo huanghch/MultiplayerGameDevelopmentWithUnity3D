@@ -1,11 +1,19 @@
 ﻿using System;
-using Server;
 using Net;
+using Proto;
 
-public class EventHandler
+namespace Server.logic
 {
-    public static void OnDisconnect(ClientState c)
+    public class EventHandler
     {
-        Console.WriteLine("OnDisConnect");
+        public static void OnDisconnect(ClientState c)
+        {
+            Console.WriteLine("OnDisConnect");
+        }
+
+        public static void OnTimer()
+        {
+            
+        }
     }
 }
