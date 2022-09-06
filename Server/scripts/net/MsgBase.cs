@@ -1,5 +1,7 @@
 using System;
+using System.Reflection;
 using System.Text.Json;
+using Proto;
 
 namespace Net
 {
@@ -24,8 +26,15 @@ namespace Net
         // 解码
         public static MsgBase Decode(string protoName, byte[] bytes, int offset, int count)
         {
+            protoName = "Proto." + protoName;
+            
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            
             string s = System.Text.Encoding.UTF8.GetString(bytes, offset, count);
-            MsgBase msgBase = (MsgBase) JsonSerializer.Deserialize(s, Type.GetType(protoName));
+            MsgBase msgBase = (MsgBase)JsonSerializer.Deserialize(s,Type.GetType(protoName),options);
             return msgBase;
         }
 

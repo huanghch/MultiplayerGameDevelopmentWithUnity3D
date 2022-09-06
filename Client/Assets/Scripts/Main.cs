@@ -1,11 +1,82 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Net.Proto;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Main : MonoBehaviour
 {
-    // Net
+    private const string IP = "127.0.0.1";
+    private const int Port = 8888;
+    
+    public Button btnConnect;
+    public Button btnSend;
+    public Button btnClose;
+    
+    private void Start()
+    {
+        btnConnect.onClick.AddListener(OnConnectClick);
+        btnSend.onClick.AddListener(OnSendClick);
+        btnClose.onClick.AddListener(OnCloseClick);
+        
+        NetManager.AddEventListener(NetManager.NetEvent.ConnectSucc, OnConnectSucc);
+        NetManager.AddEventListener(NetManager.NetEvent.ConnectFail, OnConnectFail);
+        NetManager.AddEventListener(NetManager.NetEvent.Close, OnConnectClose);
+        NetManager.AddMsgListener("MsgMove", OnMsgMove);
+    }
+    
+    public void Update()
+    {
+        NetManager.Update();
+    }
+
+    public void OnConnectClick()
+    {
+        NetManager.Connect(IP,Port);
+    }
+
+    public void OnSendClick()
+    {
+        MsgMove msgMove = new MsgMove();
+        msgMove.x = 1;
+        msgMove.y = 1;
+        msgMove.z = 1;
+        NetManager.Send(msgMove);
+    }
+
+    public void OnCloseClick()
+    {
+        NetManager.Close();
+    }
+
+    public void OnMsgMove(MsgBase msgBase)
+    {
+        MsgMove msg = (MsgMove) msgBase;
+        // 消息处理
+        Debug.Log("OnMsgMove msg.x = " + msg.x);
+        Debug.Log("OnMsgMove msg.y = " + msg.y);
+        Debug.Log("OnMsgMove msg.z = " + msg.z);
+    }
+    
+    public void OnConnectSucc(string s)
+    {
+        Debug.Log("OnConnectSucc");
+    }
+    public void OnConnectFail(string s)
+    {
+        Debug.Log("OnConnectFail");
+    }
+    public void OnConnectClose(string s)
+    {
+        Debug.Log("OnConnectClose");
+    }
+
+
+
+
+    /*// Net
     private const string IP = "127.0.0.1";
     private const int Port = 8888;
     
@@ -116,5 +187,5 @@ public class Main : MonoBehaviour
     void OnLeave(string msgArgs)
     {
         Debug.Log("OnLeave|" + msgArgs);
-    }
+    }*/
 }

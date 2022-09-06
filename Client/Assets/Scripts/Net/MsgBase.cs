@@ -16,9 +16,18 @@ public class MsgBase
     // 解码
     public static MsgBase Decode(string protoName, byte[] bytes, int offset, int count)
     {
-        string s = System.Text.Encoding.UTF8.GetString(bytes, offset, count);
-        MsgBase msgBase = (MsgBase) JsonUtility.FromJson(s, Type.GetType(protoName));
-        return msgBase;
+        try
+        {
+            protoName = "Net.Proto." + protoName;
+            string s = System.Text.Encoding.UTF8.GetString(bytes, offset, count);
+            MsgBase msgBase = (MsgBase) JsonUtility.FromJson(s, Type.GetType(protoName));
+            return msgBase;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+            throw;
+        }
     }
     
     //编码协议名(2字节长度+字符串)

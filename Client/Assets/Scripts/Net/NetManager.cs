@@ -5,15 +5,14 @@ using UnityEngine;
 using System.Net.Sockets;
 using Net.Proto;
 
-public enum NetEvent
-{
-    ConnectSucc = 1,
-    ConnectFail = 2,
-    Close = 3,
-}
-
 public static class NetManager
 {
+    public enum NetEvent
+    {
+        ConnectSucc = 1,
+        ConnectFail = 2,
+        Close = 3,
+    }
     // private const string IP = "127.0.0.1";
     // private const int Port = 8888;
     
