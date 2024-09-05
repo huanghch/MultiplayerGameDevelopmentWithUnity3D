@@ -10,7 +10,11 @@ namespace Server.logic
         {
             MsgMove msgMove = (MsgMove) msgBase;
             Console.WriteLine(msgMove.x);
+            Console.WriteLine(msgMove.y);
+            Console.WriteLine(msgMove.z);
             msgMove.x++;
+            msgMove.y++;
+            msgMove.z++;
             NetManager.Send(c, msgMove);
         }
     }

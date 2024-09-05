@@ -36,12 +36,12 @@ public static class NetManager
     public delegate void MsgListener(MsgBase str);
     // 消息监听列表
     private static Dictionary<string, MsgListener> _msgListeners = new Dictionary<string, MsgListener>();
-    // 每一次Update处理的消息量
-    private readonly static int MAX_MESSAGE_FIRE = 10;
     
     // 消息列表
     private static List<MsgBase> _msgList = new List<MsgBase>();
     private static int _msgCount = 0;
+    // 每一次Update处理的消息量
+    private readonly static int MAX_MESSAGE_FIRE = 10;
     
     // 是否启用心跳
     public static bool isUsingPing = true;
@@ -356,7 +356,8 @@ public static class NetManager
     // 监听Pong协议
     private static void OnMsgPong(MsgBase msgBase)
     {
-        _lastPingTime = Time.time;
+        _lastPongTime = Time.time;
+        Debug.Log("Receive Pong : " + _lastPongTime);
     }
     
     // 添加消息监听

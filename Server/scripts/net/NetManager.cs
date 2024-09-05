@@ -17,6 +17,10 @@ namespace Net
         public static Dictionary<Socket, ClientState> clients = new Dictionary<Socket, ClientState>();
         // Select的检查列表
         private static List<Socket> checkRead = new List<Socket>();
+
+        // ping间隔
+        public static long pingInterval = 30;
+
         
         public static void StartLoop(int listenPort)
         {
@@ -66,6 +70,7 @@ namespace Net
                 Console.WriteLine("Accept: " + clientfd.RemoteEndPoint.ToString());
                 ClientState state = new ClientState();
                 state.socket = clientfd;
+                state.lastPingTime = GetTimeStamp();
                 clients.Add(clientfd, state);
             }
             catch (SocketException ex)
@@ -226,5 +231,11 @@ namespace Net
             } 
         } 
 
+        // 获取时间戳
+        public static long GetTimeStamp()
+        {
+            TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            return Convert.ToInt64(ts.TotalSeconds);
+        }
     }
 }

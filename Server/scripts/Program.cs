@@ -22,7 +22,23 @@ namespace Server
         {
             NetManager.StartLoop(8888);
         }
-        
+
+        // 测试代码
+        /*public static void Main(string[] args)
+        {
+            MsgMove msgMove = new MsgMove();
+            msgMove.x = 100;
+            msgMove.y = -20;
+            byte[] bytes = MsgBase.Encode(msgMove);
+            string s = System.Text.Encoding.UTF8.GetString(bytes);
+            Console.WriteLine(s);
+
+            MsgMove m = (MsgMove)MsgBase.Decode("MsgMove", bytes, 0, bytes.Length);
+            Console.WriteLine(m.x);
+            Console.WriteLine(m.y);
+            Console.WriteLine(m.z);
+        }*/
+
         /*public static void Main(string[] args)
         {
             // Socket
@@ -149,7 +165,7 @@ namespace Server
             byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
             cs.socket.Send(sendBytes);
         }*/
-        
+
         // Poll状态检测
         /*public static void Main(string[] args)
         {
@@ -192,7 +208,7 @@ namespace Server
                 System.Threading.Thread.Sleep(1);
             }
         }*/
-        
+
         // Socket
         /*public static void Main(string[] args)
         {
