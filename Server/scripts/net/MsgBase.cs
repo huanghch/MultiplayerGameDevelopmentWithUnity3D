@@ -1,7 +1,8 @@
 using System;
 using System.Reflection;
-using System.Text.Json;
+using System.Text;
 using Proto;
+using System.Web.Script.Serialization;
 
 namespace Net
 {
@@ -10,16 +11,13 @@ namespace Net
         // 协议名
         public string protoName { get; set; }
 
+        // 编码器
+        static JavaScriptSerializer Js = new JavaScriptSerializer();
+
         // 编码
         public static byte[] Encode(MsgBase msgBase)
         {
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-
-            string s = JsonSerializer.Serialize<object>(msgBase, options);
-            //string s = JsonUtility.ToJson(msgBase);
+            string s = Js.Serialize(msgBase);
             return System.Text.Encoding.UTF8.GetBytes(s);
         }
 
@@ -27,14 +25,9 @@ namespace Net
         public static MsgBase Decode(string protoName, byte[] bytes, int offset, int count)
         {
             protoName = "Proto." + protoName;
-            
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-            
+
             string s = System.Text.Encoding.UTF8.GetString(bytes, offset, count);
-            MsgBase msgBase = (MsgBase)JsonSerializer.Deserialize(s,Type.GetType(protoName),options);
+            MsgBase msgBase = (MsgBase)Js.Deserialize(s,Type.GetType(protoName));
             return msgBase;
         }
 

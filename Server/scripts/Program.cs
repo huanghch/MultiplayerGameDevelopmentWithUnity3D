@@ -5,9 +5,10 @@ using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
-using System.Text.Json;
+using System.Text;
 using Proto;
 using Net;
+using Server.db;
 
 namespace Server
 {
@@ -20,6 +21,10 @@ namespace Server
 
         public static void Main(string[] args)
         {
+            if (!DbManager.Connect("game", "127.0.0.1", 3306, "root", ""))
+            {
+                return;
+            }
             NetManager.StartLoop(8888);
         }
 
