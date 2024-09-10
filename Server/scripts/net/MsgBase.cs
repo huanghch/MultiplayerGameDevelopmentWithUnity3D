@@ -4,8 +4,7 @@ using System.Text;
 using Proto;
 using System.Web.Script.Serialization;
 
-namespace Net
-{
+
     public class MsgBase
     {
         // 协议名
@@ -72,4 +71,3 @@ namespace Net
             return name;
         }
     }
-}
