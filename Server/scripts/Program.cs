@@ -3,12 +3,6 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Linq;
-using System.Text;
-using Proto;
-using Net;
-using Server.db;
 
 namespace Server
 {
@@ -25,6 +19,7 @@ namespace Server
             {
                 return;
             }
+
             NetManager.StartLoop(8888);
         }
 

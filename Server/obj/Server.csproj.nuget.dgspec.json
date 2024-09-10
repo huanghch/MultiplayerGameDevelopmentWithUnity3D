@@ -26,7 +26,7 @@
         },
         "frameworks": {
           "net452": {
-            "targetAlias": "net4.5.2",
+            "targetAlias": "net452",
             "projectReferences": {}
           }
         },
@@ -38,7 +38,7 @@
       },
       "frameworks": {
         "net452": {
-          "targetAlias": "net4.5.2",
+          "targetAlias": "net452",
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.416\\RuntimeIdentifierGraph.json"
         }
       },

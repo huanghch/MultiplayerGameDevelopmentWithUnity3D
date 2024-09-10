@@ -1,4 +1,3 @@
-using Net;
 namespace Proto
 {
     public class MsgMove : MsgBase
