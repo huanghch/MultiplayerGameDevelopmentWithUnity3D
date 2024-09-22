@@ -249,7 +249,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66957ac58e04449438dd615f4add43e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1732399649
+--- !u!1 &878790702
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -257,9 +257,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1732399652}
-  - component: {fileID: 1732399651}
-  - component: {fileID: 1732399650}
+  - component: {fileID: 878790705}
+  - component: {fileID: 878790704}
+  - component: {fileID: 878790703}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
@@ -267,27 +267,27 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
---- !u!154 &1732399650
+--- !u!154 &878790703
 TerrainCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1732399649}
+  m_GameObject: {fileID: 878790702}
   m_Material: {fileID: 0}
   m_Enabled: 1
-  m_TerrainData: {fileID: 15600000, guid: bb86e5e86d26b41418d3be2f5da367b0, type: 2}
+  m_TerrainData: {fileID: 15600000, guid: b0ca2906d7930b94d984af9d8ad8f8ce, type: 2}
   m_EnableTreeColliders: 1
---- !u!218 &1732399651
+--- !u!218 &878790704
 Terrain:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1732399649}
+  m_GameObject: {fileID: 878790702}
   m_Enabled: 1
   serializedVersion: 6
-  m_TerrainData: {fileID: 15600000, guid: bb86e5e86d26b41418d3be2f5da367b0, type: 2}
+  m_TerrainData: {fileID: 15600000, guid: b0ca2906d7930b94d984af9d8ad8f8ce, type: 2}
   m_TreeDistance: 5000
   m_TreeBillboardDistance: 50
   m_TreeCrossFadeLength: 5
@@ -311,15 +311,15 @@ Terrain:
   m_GroupingID: 0
   m_RenderingLayerMask: 1
   m_AllowAutoConnect: 1
---- !u!4 &1732399652
+--- !u!4 &878790705
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1732399649}
+  m_GameObject: {fileID: 878790702}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -500, y: 0, z: -500}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

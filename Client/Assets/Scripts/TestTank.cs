@@ -17,5 +17,7 @@ public class TestTank : MonoBehaviour
         GameObject tankObj = new GameObject("myTank");
         CtrlTank ctrlTank = tankObj.AddComponent<CtrlTank>();
         ctrlTank.Init(skinPath);
+
+        tankObj.AddComponent<CameraFollow>();
     }
 }

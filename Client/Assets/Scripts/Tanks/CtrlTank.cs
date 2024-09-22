@@ -8,6 +8,8 @@ public class CtrlTank : BaseTank
         base.Update();
         //移动控制
         MoveUpdate();
+        //炮塔控制
+        TurretUpdate();
     }
 
     //移动控制
@@ -20,5 +22,21 @@ public class CtrlTank : BaseTank
         float y = Input.GetAxis("Vertical");
         Vector3 s = y * transform.forward * speed * Time.deltaTime;
         transform.transform.position += s;
+    }
+    
+    //炮塔控制
+    public void TurretUpdate(){
+        //或者轴向
+        float axis = 0;
+        if(Input.GetKey(KeyCode.Q)){
+            axis = -1;
+        }
+        else if(Input.GetKey(KeyCode.E)){
+            axis = 1;
+        }
+        //旋转角度
+        Vector3 le = turret.localEulerAngles;
+        le.y += axis * Time.deltaTime * turretSpeed;
+        turret.localEulerAngles = le;
     }
 }
