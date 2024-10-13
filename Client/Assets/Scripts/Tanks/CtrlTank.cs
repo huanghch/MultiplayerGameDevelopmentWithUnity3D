@@ -10,11 +10,17 @@ public class CtrlTank : BaseTank
         MoveUpdate();
         //炮塔控制
         TurretUpdate();
+        //开炮
+        FireUpdate();
     }
 
     //移动控制
     public void MoveUpdate()
     {
+        //已经死亡
+        if(IsDie()){
+            return;
+        }
         //旋转
         float x = Input.GetAxis("Horizontal");
         transform.Rotate(0, x * steer * Time.deltaTime, 0);
@@ -25,7 +31,12 @@ public class CtrlTank : BaseTank
     }
     
     //炮塔控制
-    public void TurretUpdate(){
+    public void TurretUpdate()
+    {
+        //已经死亡
+        if(IsDie()){
+            return;
+        }
         //或者轴向
         float axis = 0;
         if(Input.GetKey(KeyCode.Q)){
@@ -39,4 +50,23 @@ public class CtrlTank : BaseTank
         le.y += axis * Time.deltaTime * turretSpeed;
         turret.localEulerAngles = le;
     }
+    
+    //开炮
+    public void FireUpdate()
+    {
+        //已经死亡
+        if(IsDie()){
+            return;
+        }
+        //按键判断
+        if(!Input.GetKey(KeyCode.Space)){
+            return;
+        }
+        //cd是否判断
+        if(Time.time - lastFireTime < fireCd){
+            return;
+        }
+        //发射
+        Fire();
+    } 
 }
