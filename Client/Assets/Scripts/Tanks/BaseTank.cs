@@ -11,7 +11,7 @@ public class BaseTank : MonoBehaviour
     //转向速度
     public float steer = 20;
     //移动速度
-    public float speed = 3f;
+    public float speed = 6f;
     //物理
     protected Rigidbody rigidBody; 
     
