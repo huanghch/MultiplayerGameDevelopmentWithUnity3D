@@ -28,12 +28,12 @@ public class LoginPanel : BasePanel
     public override void OnShow(params object[] args)
     {
         // 绑定
-        idInput = skin.transform.Find("IdInput").GetComponent<InputField>();
-        pwInput = skin.transform.Find("PwInput").GetComponent<InputField>();
-        loginBtn = skin.transform.Find("LoginBtn").GetComponent<Button>();
-        regBtn = skin.transform.Find("RegisterBtn").GetComponent<Button>();
-        connectBtn = skin.transform.Find("ConnectBtn").GetComponent<Button>();
-        closeBtn = skin.transform.Find("CloseBtn").GetComponent<Button>();
+        idInput = skin.transform.Find("Layout/ID/IdInput").GetComponent<InputField>();
+        pwInput = skin.transform.Find("Layout/PW/PwInput").GetComponent<InputField>();
+        loginBtn = skin.transform.Find("Layout/Btns/LoginBtn").GetComponent<Button>();
+        regBtn = skin.transform.Find("Layout/Btns/RegisterBtn").GetComponent<Button>();
+        connectBtn = skin.transform.Find("Layout/Btns/ConnectBtn").GetComponent<Button>();
+        closeBtn = skin.transform.Find("Layout/Btns/CloseBtn").GetComponent<Button>();
         // 监听
         loginBtn.onClick.AddListener(OnLoginClick);
         regBtn.onClick.AddListener(OnRegClick);
